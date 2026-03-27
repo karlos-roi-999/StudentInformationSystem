@@ -9,7 +9,8 @@ const inputStyle = {
 
 function Login({ setUserRole, setUserInfo }) {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: 'm.thompson@school.com', password: 'MThompson43' }); // Default Login that routes to SuperAdmin (cuz I always forget the password and email LOL)
+  // ALTERNATIVE LOGIN FOR A STUDENT {email: "karlos.santos@school.com", password:"KSantos11"} ☝️
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 

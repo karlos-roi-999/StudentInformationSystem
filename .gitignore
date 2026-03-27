@@ -18,6 +18,7 @@ dist/
 # Project docs to exclude
 Frontend_Requirements.md
 Requirements.md
+SQL_Reference.md
 
 # Backup folder
 backend_backup/

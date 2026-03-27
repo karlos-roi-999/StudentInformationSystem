@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* { 
+  box-sizing: border-box; margin: 0; padding: 0; 
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #f3f4f6;
+  color: #1f2937;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Minimal utility — only things that can't be inline */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #111827 !important;
+}

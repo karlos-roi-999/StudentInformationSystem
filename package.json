@@ -1,0 +1,19 @@
+{
+  "name": "studentinformationsystem",
+  "version": "1.0.0",
+  "description": "This repository contains the backend and frontend components for a high school academic management platform. It handles student enrolment, faculty assignments, and course scheduling.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npx nodemon server.js",
+    "frontend": "cd frontend && npm run dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

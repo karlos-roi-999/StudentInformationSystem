@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+
+# Project docs to exclude
+Frontend_Requirements.md
+Requirements.md
+
+# Backup folder
+backend_backup/

@@ -10,8 +10,16 @@ To run this project locally, you need the following installed:
 ## Setup Instructions
 
 ### 1. Database Configuration
-Open the XAMPP Control Panel and start the MySQL service. Start Apache if you need to access phpMyAdmin.
-You must have a local MySQL database named `student_info_system_db` created before running the backend.
+Open the XAMPP Control Panel and start both **Apache** and **MySQL** services.
+
+Then set up the database:
+
+1. Go to `http://localhost/phpmyadmin` in your browser
+2. Click **New** in the left sidebar and create a database named `student_info_system_db`
+3. Select the `student_info_system_db` database
+4. Click the **SQL** tab at the top
+5. Open `backend/student_info_system_db.sql` from this project in a text editor, copy the entire contents, and paste it into the SQL tab
+6. Click **Go** to execute — this will create all tables, seed the data, and set up the stored procedure
 
 ### 2. Install Dependencies
 Open a terminal and install the required packages for both backend and frontend:

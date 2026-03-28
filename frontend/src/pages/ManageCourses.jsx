@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit2 } from 'lucide-react';
 import Modal from '../components/SharedComponents/Modal.jsx';
 
 const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', marginBottom: '1rem', fontSize: '0.9rem', backgroundColor: '#fafafa' };
@@ -10,7 +10,21 @@ const tdStyle = { padding: '12px 16px', borderBottom: '1px solid #f3f4f6' };
 function ManageCourses({ refresh, refreshTrigger }) {
   const [courses, setCourses] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ course_name: '', subject_area: 'Math', grade_level: '10', course_description: '' });
+  const [editingId, setEditingId] = useState(null);
+  const initialForm = { course_name: '', subject_area: 'Math', grade_level: '10', course_description: '' };
+  const [formData, setFormData] = useState(initialForm);
+
+  function handleAddClick() { setEditingId(null); setFormData(initialForm); setShowModal(true); }
+  function handleEditClick(c) {
+    setEditingId(c.CourseID || c.course_id);
+    setFormData({
+      course_name: c.CourseName || c.course_name || '',
+      subject_area: c.SubjectArea || c.subject_area || 'Math',
+      grade_level: String(c.GradeLevel || c.grade_level || '10'),
+      course_description: c.CourseDescription || c.course_description || ''
+    });
+    setShowModal(true);
+  }
 
   useEffect(() => {
     axios.get('/api/course')
@@ -22,8 +36,11 @@ function ManageCourses({ refresh, refreshTrigger }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    try { await axios.post('/api/course', formData); setShowModal(false); refresh(); }
-    catch (error) { alert('Error: ' + error.message); }
+    try {
+      if (editingId) { await axios.put(`/api/course/${editingId}`, formData); }
+      else { await axios.post('/api/course', formData); }
+      setShowModal(false); refresh();
+    } catch (error) { alert('Error: ' + error.message); }
   }
 
   async function handleDelete(id) {
@@ -39,7 +56,7 @@ function ManageCourses({ refresh, refreshTrigger }) {
           <h1 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>Manage Courses</h1>
           <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>View and register school courses</p>
         </div>
-        <button onClick={() => setShowModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#111827', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}>
+        <button onClick={handleAddClick} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#111827', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}>
           <Plus size={16} /> Add Course
         </button>
       </div>
@@ -58,7 +75,10 @@ function ManageCourses({ refresh, refreshTrigger }) {
                   <td style={{ ...tdStyle, fontWeight: 500 }}>{c.CourseName || c.course_name}</td>
                   <td style={tdStyle}><span style={{ padding: '4px 12px', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#e5e7eb', color: '#374151' }}>{c.SubjectArea || c.subject_area}</span></td>
                   <td style={tdStyle}>{c.GradeLevel || c.grade_level}</td>
-                  <td style={tdStyle}><button onClick={() => handleDelete(id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={16} /></button></td>
+                  <td style={tdStyle}>
+                    <button onClick={() => handleEditClick(c)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3b82f6', marginRight: '12px' }}><Edit2 size={16} /></button>
+                    <button onClick={() => handleDelete(id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={16} /></button>
+                  </td>
                 </tr>
               );
             })}
@@ -67,7 +87,7 @@ function ManageCourses({ refresh, refreshTrigger }) {
       </div>
 
       {showModal && (
-        <Modal title="Add Course" onClose={() => setShowModal(false)}>
+        <Modal title={editingId ? 'Edit Course' : 'Add Course'} onClose={() => setShowModal(false)}>
           <form onSubmit={handleSubmit}>
             <label style={{ fontSize: '0.85rem', fontWeight: 500 }}>Course Name</label><input required name="course_name" value={formData.course_name} onChange={handleChange} style={inputStyle} placeholder="e.g. Advanced Calculus" />
             <label style={{ fontSize: '0.85rem', fontWeight: 500 }}>Subject Area</label>

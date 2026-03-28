@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit2 } from 'lucide-react';
 import Modal from '../components/SharedComponents/Modal.jsx';
 import StatusBadge from '../components/SharedComponents/StatusBadge.jsx';
 
@@ -18,13 +18,21 @@ const tdStyle = { padding: '12px 16px', borderBottom: '1px solid #f3f4f6' };
 function ManageStudents({ refresh, refreshTrigger }) {
   const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
+  const [editingId, setEditingId] = useState(null);
+  const initialForm = {
     first_name: '', last_name: '', email: '', phone_number: '',
     date_of_birth: '', grade_level: '10', enrollment_status: 'Active',
     student_type: 'FullTime',
     extra_curricular: '', guardian_contact_info: '',
     reason_for_part_time: '', hours_enrolled_per_week: ''
-  });
+  };
+  const [formData, setFormData] = useState(initialForm);
+
+  function handleAddClick() {
+    setEditingId(null);
+    setFormData(initialForm);
+    setShowModal(true);
+  }
 
   // GET all students
   useEffect(() => {
@@ -33,9 +41,11 @@ function ManageStudents({ refresh, refreshTrigger }) {
       .catch(err => { console.error(`Error: ${err}`); });
   }, [refreshTrigger]);
 
-  function handleChange(e) { setFormData({ ...formData, [e.target.name]: e.target.value }); }
+  function handleChange(e) { 
+    setFormData({ ...formData, [e.target.name]: e.target.value }); 
+  }
 
-  // POST new student
+  // POST or PUT student
   async function handleSubmit(e) {
     e.preventDefault();
     const payload = { ...formData };
@@ -48,10 +58,34 @@ function ManageStudents({ refresh, refreshTrigger }) {
       if (payload.hours_enrolled_per_week) payload.hours_enrolled_per_week = parseFloat(payload.hours_enrolled_per_week);
     }
     try {
-      await axios.post('/api/students', payload);
+      if (editingId) {
+        await axios.put(`/api/students/${editingId}`, payload);
+      } else {
+        await axios.post('/api/students', payload);
+      }
       setShowModal(false);
       refresh();
     } catch (error) { alert('Error: ' + error.message); }
+  }
+
+  function handleEditClick(student) {
+    const id = student.StudentID || student.student_id;
+    setEditingId(id);
+    setFormData({
+      first_name: student.FirstName || student.first_name || '',
+      last_name: student.LastName || student.last_name || '',
+      email: student.Email || student.email || '',
+      phone_number: student.PhoneNumber || student.phone_number || '',
+      date_of_birth: student.DateOfBirth ? String(student.DateOfBirth).split('T')[0] : '',
+      grade_level: student.GradeLevel || student.grade_level || '10',
+      enrollment_status: student.EnrolmentStatus || student.EnrollmentStatus || student.enrollment_status || 'Active',
+      student_type: student.student_type || 'FullTime',
+      extra_curricular: student.ExtraCurricularActivities || '',
+      guardian_contact_info: student.GuardianContactInfo || '',
+      reason_for_part_time: student.ReasonForPartTime || '',
+      hours_enrolled_per_week: student.HoursEnrolledPerWeek || ''
+    });
+    setShowModal(true);
   }
 
   // DELETE student
@@ -70,7 +104,7 @@ function ManageStudents({ refresh, refreshTrigger }) {
           <h1 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>Manage Students</h1>
           <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>View and register student profiles</p>
         </div>
-        <button onClick={() => setShowModal(true)} style={{
+        <button onClick={handleAddClick} style={{
           display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px',
           backgroundColor: '#111827', color: 'white', border: 'none',
           borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem'
@@ -102,6 +136,9 @@ function ManageStudents({ refresh, refreshTrigger }) {
                   <td style={tdStyle}>{s.GradeLevel || s.grade_level}</td>
                   <td style={tdStyle}><StatusBadge status={status} /></td>
                   <td style={tdStyle}>
+                    <button onClick={() => handleEditClick(s)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3b82f6', marginRight: '12px' }}>
+                      <Edit2 size={16} />
+                    </button>
                     <button onClick={() => handleDelete(id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
                       <Trash2 size={16} />
                     </button>
@@ -115,7 +152,7 @@ function ManageStudents({ refresh, refreshTrigger }) {
 
       {/* Add Student Modal */}
       {showModal && (
-        <Modal title="Register New Student" onClose={() => setShowModal(false)}>
+        <Modal title={editingId ? "Edit Student" : "Register New Student"} onClose={() => setShowModal(false)}>
           <form onSubmit={handleSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
               <div><label style={{ fontSize: '0.85rem', fontWeight: 500 }}>First Name</label><input required name="first_name" value={formData.first_name} onChange={handleChange} style={inputStyle} /></div>

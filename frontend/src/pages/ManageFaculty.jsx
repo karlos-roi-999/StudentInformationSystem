@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit2 } from 'lucide-react';
 import Modal from '../components/SharedComponents/Modal.jsx';
 
 const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', marginBottom: '1rem', fontSize: '0.9rem', backgroundColor: '#fafafa' };
@@ -10,7 +10,22 @@ const tdStyle = { padding: '12px 16px', borderBottom: '1px solid #f3f4f6' };
 function ManageFaculty({ refresh, refreshTrigger }) {
   const [faculty, setFaculty] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ first_name: '', last_name: '', email: '', phone_number: '', position: 'Teacher' });
+  const [editingId, setEditingId] = useState(null);
+  const initialForm = { first_name: '', last_name: '', email: '', phone_number: '', position: 'Teacher' };
+  const [formData, setFormData] = useState(initialForm);
+
+  function handleAddClick() { setEditingId(null); setFormData(initialForm); setShowModal(true); }
+  function handleEditClick(f) {
+    setEditingId(f.FacultyID || f.faculty_id);
+    setFormData({
+      first_name: f.FirstName || f.first_name || '',
+      last_name: f.LastName || f.last_name || '',
+      email: f.Email || f.email || '',
+      phone_number: f.PhoneNumber || f.phone_number || '',
+      position: f.Position || f.position || 'Teacher'
+    });
+    setShowModal(true);
+  }
 
   useEffect(() => {
     axios.get('/api/faculty')
@@ -22,8 +37,11 @@ function ManageFaculty({ refresh, refreshTrigger }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    try { await axios.post('/api/faculty', formData); setShowModal(false); refresh(); }
-    catch (error) { alert('Error: ' + error.message); }
+    try {
+      if (editingId) { await axios.put(`/api/faculty/${editingId}`, formData); }
+      else { await axios.post('/api/faculty', formData); }
+      setShowModal(false); refresh();
+    } catch (error) { alert('Error: ' + error.message); }
   }
 
   async function handleDelete(id) {
@@ -39,7 +57,7 @@ function ManageFaculty({ refresh, refreshTrigger }) {
           <h1 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>Manage Faculty</h1>
           <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>View and register faculty profiles</p>
         </div>
-        <button onClick={() => setShowModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#111827', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}>
+        <button onClick={handleAddClick} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#111827', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}>
           <Plus size={16} /> Add Faculty
         </button>
       </div>
@@ -59,7 +77,10 @@ function ManageFaculty({ refresh, refreshTrigger }) {
                   <td style={tdStyle}>{f.Email || f.email}</td>
                   <td style={tdStyle}>{f.PhoneNumber || f.phone_number || '-'}</td>
                   <td style={tdStyle}>{f.Position || f.position}</td>
-                  <td style={tdStyle}><button onClick={() => handleDelete(id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={16} /></button></td>
+                  <td style={tdStyle}>
+                    <button onClick={() => handleEditClick(f)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3b82f6', marginRight: '12px' }}><Edit2 size={16} /></button>
+                    <button onClick={() => handleDelete(id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={16} /></button>
+                  </td>
                 </tr>
               );
             })}
@@ -68,7 +89,7 @@ function ManageFaculty({ refresh, refreshTrigger }) {
       </div>
 
       {showModal && (
-        <Modal title="Add Faculty" onClose={() => setShowModal(false)}>
+        <Modal title={editingId ? 'Edit Faculty' : 'Add Faculty'} onClose={() => setShowModal(false)}>
           <form onSubmit={handleSubmit}>
             <label style={{ fontSize: '0.85rem', fontWeight: 500 }}>First Name</label><input required name="first_name" value={formData.first_name} onChange={handleChange} style={inputStyle} />
             <label style={{ fontSize: '0.85rem', fontWeight: 500 }}>Last Name</label><input required name="last_name" value={formData.last_name} onChange={handleChange} style={inputStyle} />

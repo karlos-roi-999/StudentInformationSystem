@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit2 } from 'lucide-react';
 import Modal from '../components/SharedComponents/Modal.jsx';
 
 const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', marginBottom: '1rem', fontSize: '0.9rem', backgroundColor: '#fafafa' };
@@ -17,7 +17,20 @@ function formatTime(timeStr) {
 function ManageSchedules({ refresh, refreshTrigger }) {
   const [schedules, setSchedules] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ days_of_week: 'MWF', start_time: '08:00', end_time: '09:00' });
+  const [editingId, setEditingId] = useState(null);
+  const initialForm = { days_of_week: 'MWF', start_time: '08:00', end_time: '09:00' };
+  const [formData, setFormData] = useState(initialForm);
+
+  function handleAddClick() { setEditingId(null); setFormData(initialForm); setShowModal(true); }
+  function handleEditClick(s) {
+    setEditingId(s.TimeSlotID || s.time_slot_id);
+    setFormData({
+      days_of_week: s.DaysOfWeek || s.days_of_week || 'MWF',
+      start_time: (s.StartTime || s.start_time || '08:00:00').substring(0, 5),
+      end_time: (s.EndTime || s.end_time || '09:00:00').substring(0, 5)
+    });
+    setShowModal(true);
+  }
 
   useEffect(() => {
     axios.get('/api/schedules')
@@ -30,8 +43,11 @@ function ManageSchedules({ refresh, refreshTrigger }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (formData.end_time <= formData.start_time) return alert('End time must be after start time.');
-    try { await axios.post('/api/schedules', formData); setShowModal(false); refresh(); }
-    catch (error) { alert('Error: ' + error.message); }
+    try {
+      if (editingId) { await axios.put(`/api/schedules/${editingId}`, formData); }
+      else { await axios.post('/api/schedules', formData); }
+      setShowModal(false); refresh();
+    } catch (error) { alert('Error: ' + error.message); }
   }
 
   async function handleDelete(id) {
@@ -44,7 +60,7 @@ function ManageSchedules({ refresh, refreshTrigger }) {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div><h1 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>Time Slots</h1><p style={{ color: '#6b7280', fontSize: '0.9rem' }}>Manage reusable class time blocks</p></div>
-        <button onClick={() => setShowModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#111827', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}><Plus size={16} /> Add Time Slot</button>
+        <button onClick={handleAddClick} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#111827', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}><Plus size={16} /> Add Time Slot</button>
       </div>
       <div style={{ backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -59,7 +75,10 @@ function ManageSchedules({ refresh, refreshTrigger }) {
                   <td style={tdStyle}><span style={{ padding: '4px 12px', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#e5e7eb', color: '#374151' }}>{s.DaysOfWeek || s.days_of_week}</span></td>
                   <td style={tdStyle}>{formatTime(s.StartTime || s.start_time)}</td>
                   <td style={tdStyle}>{formatTime(s.EndTime || s.end_time)}</td>
-                  <td style={tdStyle}><button onClick={() => handleDelete(id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={16} /></button></td>
+                  <td style={tdStyle}>
+                    <button onClick={() => handleEditClick(s)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3b82f6', marginRight: '12px' }}><Edit2 size={16} /></button>
+                    <button onClick={() => handleDelete(id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={16} /></button>
+                  </td>
                 </tr>
               );
             })}
@@ -67,7 +86,7 @@ function ManageSchedules({ refresh, refreshTrigger }) {
         </table>
       </div>
       {showModal && (
-        <Modal title="Add Time Slot" onClose={() => setShowModal(false)}>
+        <Modal title={editingId ? 'Edit Time Slot' : 'Add Time Slot'} onClose={() => setShowModal(false)}>
           <form onSubmit={handleSubmit}>
             <label style={{ fontSize: '0.85rem', fontWeight: 500 }}>Days of Week</label>
             <select name="days_of_week" value={formData.days_of_week} onChange={handleChange} style={inputStyle}>

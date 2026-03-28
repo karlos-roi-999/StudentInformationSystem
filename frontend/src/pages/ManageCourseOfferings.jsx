@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit2 } from 'lucide-react';
 import Modal from '../components/SharedComponents/Modal.jsx';
 
 const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', marginBottom: '1rem', fontSize: '0.9rem', backgroundColor: '#fafafa' };
@@ -16,7 +16,22 @@ function ManageCourseOfferings({ refresh, refreshTrigger }) {
   const [schedules, setSchedules] = useState([]);
   const [faculty, setFaculty] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ section_name: '', course_id: '', term_id: '', time_slot_id: '', faculty_id: '' });
+  const [editingId, setEditingId] = useState(null);
+  const initialForm = { section_name: '', course_id: '', term_id: '', time_slot_id: '', faculty_id: '' };
+  const [formData, setFormData] = useState(initialForm);
+
+  function handleAddClick() { setEditingId(null); setFormData(initialForm); setShowModal(true); }
+  function handleEditClick(o) {
+    setEditingId(o.CourseOfferingID || o.course_offering_id);
+    setFormData({
+      section_name: o.SectionName || o.section_name || '',
+      course_id: String(o.CourseID || o.course_id || ''),
+      term_id: String(o.TermID || o.term_id || ''),
+      time_slot_id: String(o.TimeSlotID || o.time_slot_id || ''),
+      faculty_id: String(o.FacultyID || o.faculty_id || '')
+    });
+    setShowModal(true);
+  }
 
   useEffect(() => {
     Promise.all([
@@ -40,8 +55,11 @@ function ManageCourseOfferings({ refresh, refreshTrigger }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    try { await axios.post('/api/course-offerings', formData); setShowModal(false); refresh(); }
-    catch (error) { alert('Error: ' + error.message); }
+    try {
+      if (editingId) { await axios.put(`/api/course-offerings/${editingId}`, formData); }
+      else { await axios.post('/api/course-offerings', formData); }
+      setShowModal(false); refresh();
+    } catch (error) { alert('Error: ' + error.message); }
   }
 
   async function handleDelete(id) {
@@ -54,7 +72,7 @@ function ManageCourseOfferings({ refresh, refreshTrigger }) {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div><h1 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>Course Offerings</h1><p style={{ color: '#6b7280', fontSize: '0.9rem' }}>Assign faculty and timeslots to courses per term</p></div>
-        <button onClick={() => setShowModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#111827', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}><Plus size={16} /> Create Offering</button>
+        <button onClick={handleAddClick} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#111827', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}><Plus size={16} /> Create Offering</button>
       </div>
       <div style={{ backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -70,7 +88,10 @@ function ManageCourseOfferings({ refresh, refreshTrigger }) {
                   <td style={tdStyle}>{(o.TermName || o.term_name)} {o.SchoolYear || o.school_year}</td>
                   <td style={tdStyle}>{o.DaysOfWeek || o.days_of_week} {formatTime(o.StartTime || o.start_time)}–{formatTime(o.EndTime || o.end_time)}</td>
                   <td style={tdStyle}>{o.FacultyFirstName || o.faculty_first_name} {o.FacultyLastName || o.faculty_last_name}</td>
-                  <td style={tdStyle}><button onClick={() => handleDelete(id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={16} /></button></td>
+                  <td style={tdStyle}>
+                    <button onClick={() => handleEditClick(o)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3b82f6', marginRight: '12px' }}><Edit2 size={16} /></button>
+                    <button onClick={() => handleDelete(id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={16} /></button>
+                  </td>
                 </tr>
               );
             })}
@@ -78,7 +99,7 @@ function ManageCourseOfferings({ refresh, refreshTrigger }) {
         </table>
       </div>
       {showModal && (
-        <Modal title="Create Course Offering" onClose={() => setShowModal(false)}>
+        <Modal title={editingId ? 'Edit Course Offering' : 'Create Course Offering'} onClose={() => setShowModal(false)}>
           <form onSubmit={handleSubmit}>
             <label style={{ fontSize: '0.85rem', fontWeight: 500 }}>Section Name</label><input required name="section_name" value={formData.section_name} onChange={handleChange} placeholder="e.g. Section A" style={inputStyle} />
             <label style={{ fontSize: '0.85rem', fontWeight: 500 }}>Course</label>

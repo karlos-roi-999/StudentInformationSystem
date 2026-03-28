@@ -22,8 +22,10 @@ Then set up the database:
 6. Click **Go** to execute — this will create all tables, seed the data, and set up the stored procedure
 
 ### 2. Install Dependencies
-Open a terminal and install the required packages for both backend and frontend:
+Open a terminal and install packages for the root, backend, and frontend:
 ```bash
+npm install
+
 cd backend
 npm install
 
@@ -54,7 +56,7 @@ The login page authenticates users against the database using bcrypt-hashed pass
 - Student emails log in as **Student**
 - Michael Thompson logs in as **Super Admin** (access to both portals)
 
-Default password format: `(FirstInitial)(LastName)(2digits)` — for example, `MThompson01`.
+Default password format: `(FirstInitial)(LastName)(2digits)` — for example, `MThompson43`.
 
 ## Project Architecture
 ```

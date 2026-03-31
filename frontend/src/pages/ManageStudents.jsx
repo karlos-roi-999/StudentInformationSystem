@@ -60,6 +60,7 @@ function ManageStudents({ refresh, refreshTrigger }) {
     try {
       if (editingId) {
         await axios.put(`/api/students/${editingId}`, payload);
+        alert("Student updated successfully");
       } else {
         await axios.post('/api/students', payload);
       }
@@ -70,16 +71,19 @@ function ManageStudents({ refresh, refreshTrigger }) {
 
   function handleEditClick(student) {
     const id = student.StudentID || student.student_id;
+    // student_type is now returned by the API via LEFT JOIN — 'FullTime', 'PartTime', or null
+    const type = student.student_type || 'FullTime';
     setEditingId(id);
     setFormData({
-      first_name: student.FirstName || student.first_name || '',
-      last_name: student.LastName || student.last_name || '',
-      email: student.Email || student.email || '',
-      phone_number: student.PhoneNumber || student.phone_number || '',
+      first_name: student.FirstName || '',
+      last_name: student.LastName || '',
+      email: student.Email || '',
+      phone_number: student.PhoneNumber || '',
       date_of_birth: student.DateOfBirth ? String(student.DateOfBirth).split('T')[0] : '',
-      grade_level: student.GradeLevel || student.grade_level || '10',
-      enrollment_status: student.EnrolmentStatus || student.EnrollmentStatus || student.enrollment_status || 'Active',
-      student_type: student.student_type || 'FullTime',
+      grade_level: student.GradeLevel || '10',
+      enrollment_status: student.EnrolmentStatus || 'Active',
+      student_type: type,
+      // Subclass fields — the API now includes these from the JOIN
       extra_curricular: student.ExtraCurricularActivities || '',
       guardian_contact_info: student.GuardianContactInfo || '',
       reason_for_part_time: student.ReasonForPartTime || '',

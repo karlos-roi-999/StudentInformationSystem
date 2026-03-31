@@ -6,7 +6,7 @@ const db = require('../db');
 router.get('/', async (req, res) => {
     try {
         const [result] = await db.query(`
-            SELECT e.enrollment_id, e.student_id, e.enrollment_date, e.enrollment_status,
+            SELECT e.enrollment_id, e.student_id, e.enrollment_date, e.enrollment_status, e.grade,
             s.FirstName AS student_first_name, s.LastName AS student_last_name,
             co.course_offering_id, co.section_name,
             c.course_name, c.subject_area,
@@ -33,11 +33,34 @@ router.get('/', async (req, res) => {
     }
 });
 
+// GET average grade per course (nested aggregation with GROUP BY)
+router.get('/avg-grades', async (req, res) => {
+    try {
+        const [result] = await db.query(`
+            SELECT c.course_id, c.course_name, c.subject_area,
+                ROUND(AVG(e.grade), 2) AS avg_grade,
+                COUNT(e.enrollment_id) AS total_enrolled,
+                COUNT(e.grade) AS graded_count
+            FROM Course c
+            JOIN Course_Offering co ON c.course_id = co.course_id
+            JOIN Enrollment e ON co.course_offering_id = e.course_offering_id
+            WHERE e.enrollment_status IN ('Enrolled', 'Completed')
+            GROUP BY c.course_id, c.course_name, c.subject_area
+            HAVING COUNT(e.grade) > 0
+            ORDER BY avg_grade DESC
+        `);
+        res.json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error fetching average grades' });
+    }
+});
+
 // GET a single enrollment by ID (with JOINs)
 router.get('/:id', async (req, res) => {
     try {
         const [result] = await db.query(`
-            SELECT e.enrollment_id, e.student_id, e.enrollment_date, e.enrollment_status,
+            SELECT e.enrollment_id, e.student_id, e.enrollment_date, e.enrollment_status, e.grade,
             s.FirstName AS student_first_name, s.LastName AS student_last_name,
             co.course_offering_id, co.section_name,
             c.course_name, c.subject_area,

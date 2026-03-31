@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit2 } from 'lucide-react';
 import Modal from '../components/SharedComponents/Modal.jsx';
 import StatusBadge from '../components/SharedComponents/StatusBadge.jsx';
 
@@ -13,19 +13,23 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
   const [hoveredId, setHoveredId] = useState(null);
   const [students, setStudents] = useState([]);
   const [offerings, setOfferings] = useState([]);
+  const [avgGrades, setAvgGrades] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [gradeModal, setGradeModal] = useState({ open: false, id: null, studentName: '', courseName: '', grade: '' });
   const [formData, setFormData] = useState({ student_id: '', course_offering_id: '', enrollment_status: 'Enrolled' });
 
   useEffect(() => {
     Promise.all([
       axios.get('/api/enrollments'),
       axios.get('/api/students'),
-      axios.get('/api/course-offerings')
+      axios.get('/api/course-offerings'),
+      axios.get('/api/enrollments/avg-grades')
     ])
-      .then(([eRes, sRes, oRes]) => {
+      .then(([eRes, sRes, oRes, avgRes]) => {
         setEnrollments(eRes.data);
         setStudents(sRes.data);
         setOfferings(oRes.data);
+        setAvgGrades(avgRes.data);
       })
       .catch(err => console.error('Error:', err));
   }, [refreshTrigger]);
@@ -44,6 +48,28 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
     catch (error) { alert('Update failed: ' + error.message); }
   }
 
+  // Open grade modal for a specific enrollment
+  function openGradeModal(enrollment) {
+    const id = enrollment.EnrollmentID || enrollment.enrollment_id;
+    setGradeModal({
+      open: true, id,
+      studentName: `${enrollment.StudentFirstName || enrollment.student_first_name} ${enrollment.StudentLastName || enrollment.student_last_name}`,
+      courseName: enrollment.CourseName || enrollment.course_name,
+      grade: enrollment.grade != null ? String(enrollment.grade) : ''
+    });
+  }
+
+  // Save grade from modal
+  async function handleGradeSave() {
+    const val = gradeModal.grade === '' ? null : parseFloat(gradeModal.grade);
+    if (val !== null && (val < 1 || val > 100)) return alert('Grade must be between 1.00 and 100.00');
+    try {
+      await axios.put(`/api/enrollments/${gradeModal.id}`, { grade: val });
+      setGradeModal({ ...gradeModal, open: false });
+      refresh();
+    } catch (error) { alert('Grade update failed: ' + error.message); }
+  }
+
   async function handleDelete(id) {
     if (!window.confirm('Delete this enrollment?')) return;
     try { await axios.delete(`/api/enrollments/${id}`); refresh(); }
@@ -58,9 +84,9 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
       </div>
       <div style={{ backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead><tr><th style={thStyle}>Student</th><th style={thStyle}>Course</th><th style={thStyle}>Section</th><th style={thStyle}>Status</th><th style={thStyle}>Update Status</th><th style={thStyle}>Actions</th></tr></thead>
+          <thead><tr><th style={thStyle}>Student</th><th style={thStyle}>Course</th><th style={thStyle}>Section</th><th style={thStyle}>Grade</th><th style={thStyle}>Status</th><th style={thStyle}>Update Status</th><th style={thStyle}>Actions</th></tr></thead>
           <tbody>
-            {enrollments.length === 0 ? <tr><td colSpan="6" style={{ ...tdStyle, textAlign: 'center', color: '#9ca3af' }}>No enrolments found.</td></tr> :
+            {enrollments.length === 0 ? <tr><td colSpan="7" style={{ ...tdStyle, textAlign: 'center', color: '#9ca3af' }}>No enrolments found.</td></tr> :
             enrollments.map(e => {
               const id = e.EnrollmentID || e.enrollment_id;
               const status = e.EnrollmentStatus || e.enrollment_status;
@@ -79,6 +105,16 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
                   <td style={{ ...tdStyle, fontWeight: 500 }}>{e.StudentFirstName || e.student_first_name} {e.StudentLastName || e.student_last_name}</td>
                   <td style={tdStyle}>{e.CourseName || e.course_name}</td>
                   <td style={tdStyle}>{e.SectionName || e.section_name}</td>
+                  <td style={tdStyle}>
+                    <button onClick={() => openGradeModal(e)} style={{ background: 'none', border: '1px solid #d1d5db', borderRadius: '6px', padding: '4px 12px', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#374151' }}>
+                      {e.grade != null ? (
+                        <span style={{ fontWeight: 600 }}>{e.grade}%</span>
+                      ) : (
+                        <span style={{ color: '#9ca3af' }}>—</span>
+                      )}
+                      <Edit2 size={12} style={{ color: '#6b7280' }} />
+                    </button>
+                  </td>
                   <td style={tdStyle}><StatusBadge status={status} /></td>
                   <td style={tdStyle}>
                     <select value={status} onChange={(ev) => handleStatusChange(id, ev.target.value)}
@@ -93,6 +129,57 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
           </tbody>
         </table>
       </div>
+
+      {/* Average Grade Per Course */}
+      {avgGrades.length > 0 && (
+        <div style={{ marginTop: '2rem', backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+          <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #e5e7eb' }}>
+            <h2 style={{ fontSize: '1rem', margin: 0 }}>Average Grade Per Course</h2>
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead><tr><th style={thStyle}>Course</th><th style={thStyle}>Subject</th><th style={thStyle}>Avg Grade</th><th style={thStyle}>Graded / Enrolled</th></tr></thead>
+            <tbody>
+              {avgGrades.map(a => (
+                <tr key={a.course_id}>
+                  <td style={{ ...tdStyle, fontWeight: 500 }}>{a.course_name}</td>
+                  <td style={tdStyle}><span style={{ padding: '4px 12px', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#e5e7eb', color: '#374151' }}>{a.subject_area}</span></td>
+                  <td style={tdStyle}>
+                    <span style={{ padding: '4px 12px', borderRadius: '99px', fontSize: '0.85rem', fontWeight: 700, backgroundColor: a.avg_grade >= 75 ? '#d1fae5' : a.avg_grade >= 50 ? '#fef3c7' : '#fef2f2', color: a.avg_grade >= 75 ? '#065f46' : a.avg_grade >= 50 ? '#92400e' : '#b91c1c' }}>
+                      {a.avg_grade}%
+                    </span>
+                  </td>
+                  <td style={tdStyle}>{a.graded_count} / {a.total_enrolled}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Grade Edit Modal */}
+      {gradeModal.open && (
+        <Modal title="Edit Grade" onClose={() => setGradeModal({ ...gradeModal, open: false })}>
+          <div style={{ marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '0 0 4px' }}>Student</p>
+            <p style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>{gradeModal.studentName}</p>
+          </div>
+          <div style={{ marginBottom: '1.25rem' }}>
+            <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '0 0 4px' }}>Course</p>
+            <p style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>{gradeModal.courseName}</p>
+          </div>
+          <label style={{ fontSize: '0.85rem', fontWeight: 500 }}>Grade (1.00 — 100.00)</label>
+          <input type="number" min="1" max="100" step="0.01"
+            value={gradeModal.grade}
+            onChange={(ev) => setGradeModal({ ...gradeModal, grade: ev.target.value })}
+            placeholder="Enter grade..."
+            style={inputStyle}
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+            <button type="button" onClick={() => setGradeModal({ ...gradeModal, open: false })} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: 'transparent', cursor: 'pointer' }}>Cancel</button>
+            <button type="button" onClick={handleGradeSave} style={{ padding: '10px 20px', borderRadius: '8px', backgroundColor: '#111827', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Save Grade</button>
+          </div>
+        </Modal>
+      )}
       {showModal && (
         <Modal title="Enrol Student" onClose={() => setShowModal(false)}>
           <form onSubmit={handleSubmit}>

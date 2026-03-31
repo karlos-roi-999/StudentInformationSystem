@@ -43,7 +43,13 @@ function StudentDashboard({ refreshTrigger, userInfo }) {
                   <td style={tdStyle}>{e.SectionName || e.section_name}</td>
                   <td style={tdStyle}>{(e.TermName || e.term_name)} {e.SchoolYear || e.school_year}</td>
                   <td style={tdStyle}><StatusBadge status={status} /></td>
-                  <td style={tdStyle}>{e.Grade || e.grade || 'N/A'}</td>
+                  <td style={tdStyle}>
+                    {e.grade != null ? (
+                      <span style={{ padding: '4px 10px', borderRadius: '99px', fontSize: '0.8rem', fontWeight: 600, backgroundColor: e.grade >= 75 ? '#d1fae5' : e.grade >= 50 ? '#fef3c7' : '#fef2f2', color: e.grade >= 75 ? '#065f46' : e.grade >= 50 ? '#92400e' : '#b91c1c' }}>
+                        {e.grade}%
+                      </span>
+                    ) : <span style={{ color: '#9ca3af' }}>N/A</span>}
+                  </td>
                 </tr>
               );
             })}

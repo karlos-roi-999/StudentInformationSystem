@@ -8,18 +8,13 @@ function AdminDashboard() {
   const [stats, setStats] = useState({ students: 0, faculty: 0, courses: 0, enrollments: 0 });
 
   useEffect(() => {
-    Promise.all([
-      axios.get('/api/students'),
-      axios.get('/api/faculty'),
-      axios.get('/api/course'),
-      axios.get('/api/enrollments')
-    ])
-      .then(([sRes, fRes, cRes, eRes]) => {
+    axios.get('/api/stats')
+      .then((res) => {
         setStats({
-          students: sRes.data.length,
-          faculty: fRes.data.length,
-          courses: cRes.data.length,
-          enrollments: eRes.data.filter(e => (e.EnrollmentStatus || e.enrollment_status) === 'Enrolled').length
+          students: res.data.total_students,
+          faculty: res.data.total_faculty,
+          courses: res.data.total_courses,
+          enrollments: res.data.active_enrolments
         });
       })
       .catch(err => console.error('Dashboard fetch error:', err));

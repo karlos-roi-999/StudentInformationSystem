@@ -17,7 +17,7 @@ router.post('/login', async (req, res) => {
 
         // Try Faculty table first
         const [faculty] = await db.query(
-            'SELECT faculty_id, first_name, last_name, email, password_hash, position FROM Faculty WHERE email = ?',
+            'SELECT faculty_id, first_name, last_name, email, password_hash, phone_number, position FROM Faculty WHERE email = ?',
             [email]
         );
 
@@ -47,6 +47,8 @@ router.post('/login', async (req, res) => {
                     first_name: user.first_name,
                     last_name: user.last_name,
                     email: user.email,
+                    phone_number: user.phone_number,
+                    position: user.position,
                     role
                 }
             });

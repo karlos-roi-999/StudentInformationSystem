@@ -11,6 +11,7 @@ const enrollmentRoutes = require('./routes/enrollments');
 const prerequisiteRoutes = require('./routes/prerequisites');
 const supervisesRoutes = require('./routes/supervises');
 const authRoutes = require('./routes/auth');
+const statRoute = require('./routes/stats');
 
 // Environment variables from .env files
 dotenv.config();
@@ -30,11 +31,12 @@ app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/prerequisites', prerequisiteRoutes);
 app.use('/api/supervises', supervisesRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/stats', statRoute);
 
-// Test (Remove later)
+// Test to see if API is running in root port
 app.get('/', (req,res) => {
     res.json({ message: "Student Information System API is running"});
-})
+});
 
 db.getConnection()
     .then((connection) => {

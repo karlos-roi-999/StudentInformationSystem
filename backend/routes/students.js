@@ -30,7 +30,6 @@ router.get('/', async (req, res) => {
     try {
         const [rows] = await db.query(STUDENT_JOIN_QUERY);
 
-        // Add student_type to every row using plain JavaScript
         const students = rows.map(row => ({
             ...row,
             student_type: deriveStudentType(row)

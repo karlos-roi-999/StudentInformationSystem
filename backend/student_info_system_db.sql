@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 27, 2026 at 09:22 PM
+-- Generation Time: Mar 31, 2026 at 08:19 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -109,7 +109,8 @@ INSERT INTO `course` (`course_id`, `course_name`, `subject_area`, `grade_level`,
 (104, 'Physics 11', 'Science', '11', 'Mechanics, waves, and basic electricity'),
 (105, 'English 11', 'English', '11', 'Literary analysis, essay writing, and communication skills'),
 (106, 'Chemistry 11', 'Science', '11', 'Atomic theory, chemical bonding, and stoichiometry'),
-(109, 'Arts 11', 'Arts', '11', 'Arts and Crafts, Paint and Post!');
+(109, 'Arts 11', 'Arts', '11', 'Arts and Crafts, Paint and Post!'),
+(111, 'Physical Education 12', 'Physical Education', '12', 'PE where you do exercise and stuff');
 
 -- --------------------------------------------------------
 
@@ -134,7 +135,8 @@ INSERT INTO `course_offering` (`course_offering_id`, `section_name`, `course_id`
 (1, 'Section A', 102, 2, 1, 102),
 (2, 'Section A', 103, 2, 2, 103),
 (3, 'Section A', 104, 2, 3, 104),
-(4, 'Section A', 105, 3, 4, 103);
+(4, 'Section A', 105, 3, 4, 103),
+(5, 'Section B', 111, 2, 2, 101);
 
 -- --------------------------------------------------------
 
@@ -147,21 +149,21 @@ CREATE TABLE `enrollment` (
   `student_id` int(11) NOT NULL,
   `course_offering_id` int(11) NOT NULL,
   `enrollment_date` date NOT NULL,
-  `enrollment_status` enum('Enrolled','Dropped','Completed') NOT NULL
+  `enrollment_status` enum('Enrolled','Dropped','Completed') NOT NULL,
+  `grade` decimal(5,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `enrollment`
 --
 
-INSERT INTO `enrollment` (`enrollment_id`, `student_id`, `course_offering_id`, `enrollment_date`, `enrollment_status`) VALUES
-(1, 100000, 1, '2026-03-26', 'Enrolled'),
-(2, 100000, 2, '2026-03-26', 'Enrolled'),
-(3, 100001, 1, '2026-03-26', 'Enrolled'),
-(5, 100002, 2, '2026-03-26', 'Enrolled'),
-(17, 100001, 2, '2026-03-27', 'Enrolled'),
-(21, 100001, 3, '2026-03-27', 'Enrolled'),
-(22, 100001, 4, '2026-03-27', 'Enrolled');
+INSERT INTO `enrollment` (`enrollment_id`, `student_id`, `course_offering_id`, `enrollment_date`, `enrollment_status`, `grade`) VALUES
+(2, 100000, 2, '2026-03-26', 'Enrolled', 100.00),
+(3, 100001, 1, '2026-03-26', 'Enrolled', 67.00),
+(5, 100002, 2, '2026-03-26', 'Enrolled', 50.00),
+(17, 100001, 2, '2026-03-27', 'Enrolled', 89.00),
+(21, 100001, 3, '2026-03-27', 'Enrolled', NULL),
+(22, 100001, 4, '2026-03-27', 'Enrolled', NULL);
 
 -- --------------------------------------------------------
 
@@ -254,13 +256,12 @@ CREATE TABLE `student` (
 --
 
 INSERT INTO `student` (`StudentID`, `FirstName`, `LastName`, `PhoneNumber`, `DateOfBirth`, `Email`, `password_hash`, `GradeLevel`, `EnrolmentStatus`) VALUES
-(1, 'Alice', 'Smith', '604-111-1111', '2002-04-12', 'alice@school.ca', '$2b$10$XiPcRdtqZXTVYg2cqrbC1erh9MIQcRxLQ2SR2YJapGOOK/8JcOFxq', '11', 'Active'),
 (100000, 'Ellise', 'Bonghanoy', '604-555-1234', '2005-08-15', 'karlosbonghanoy@mail.com', '$2b$10$622yxMzLUEtNlhUN60PEFuP7A731V/NRapW99LaqGPagQ6PT5STjO', '11', 'Active'),
 (100001, 'Karlos', 'Santos', '604-555-0101', '2008-08-15', 'karlos.santos@school.com', '$2b$10$wjETNcoXF0Fzkkss09Z9H.fNXgC3fOMRrO7sKzPGmcC1UOril0UOO', '11', 'Active'),
 (100002, 'Emma', 'Chen', '604-555-0102', '2008-03-22', 'emma.chen@school.com', '$2b$10$47JU3wQGiemwQq8SCbEb2eY4is98ETQh3RQKO04sqiGILZ1DPF5iq', '11', 'Active'),
 (100003, 'Liam', 'Rivera', '604-555-0103', '2009-11-05', 'liam.rivera@school.com', '$2b$10$KD.0rkpTlhms3abpsk12xeuJvoF9cMVf7iBAKEzbOSr36qDniEyYS', '10', 'Active'),
-(100005, 'James', 'Park', '604-555-0105', '2007-01-30', 'james.park@school.com', '$2b$10$7mJ3DEcWHX0pBNZp5ekzje0DDPDkXfZWnGu0e1K.ffnZ6K5VGH55S', '12', 'Active'),
-(100006, 'Karlos', 'Bonghanoy', '604-555-0101', '2008-08-15', 'karlos.bonghanoy@school.com', '$2b$10$MEX/yz4vj6VP31SumxxVpe0JmAq5AJkHY88TI9gNrVuYiuda1dq4u', '11', 'Active');
+(100006, 'Karlos', 'Bonghanoy', '604-555-0101', '2008-08-15', 'karlos.bonghanoy@school.com', '$2b$10$MEX/yz4vj6VP31SumxxVpe0JmAq5AJkHY88TI9gNrVuYiuda1dq4u', '11', 'Active'),
+(100007, 'James', 'Park', '6725588330', '2005-08-09', 'james.park@school.com', '', '12', 'Active');
 
 -- --------------------------------------------------------
 
@@ -279,8 +280,8 @@ CREATE TABLE `student_fulltime` (
 --
 
 INSERT INTO `student_fulltime` (`StudentID`, `ExtraCurricularActivities`, `GuardianContactInfo`) VALUES
-(1, 'Basketball, Drama Club', 'Jane Smith, 604-999-8888'),
-(100006, 'Basketball, Drama Club', 'Jane Santos, 604-555-9999');
+(100006, 'Basketball, Drama Club', 'Jane Santos, 604-555-9999'),
+(100007, 'Basketball', 'Jane Park');
 
 -- --------------------------------------------------------
 
@@ -293,6 +294,13 @@ CREATE TABLE `student_parttime` (
   `ReasonForPartTime` varchar(255) DEFAULT NULL,
   `HoursEnrolledPerWeek` decimal(4,1) DEFAULT NULL CHECK (`HoursEnrolledPerWeek` > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `student_parttime`
+--
+
+INSERT INTO `student_parttime` (`StudentID`, `ReasonForPartTime`, `HoursEnrolledPerWeek`) VALUES
+(100002, 'Work', 7.0);
 
 -- --------------------------------------------------------
 
@@ -311,7 +319,8 @@ CREATE TABLE `supervises` (
 
 INSERT INTO `supervises` (`supervisor_id`, `supervisee_id`) VALUES
 (101, 102),
-(101, 103);
+(101, 103),
+(101, 104);
 
 --
 -- Indexes for dumped tables
@@ -408,19 +417,19 @@ ALTER TABLE `academic_term`
 -- AUTO_INCREMENT for table `course`
 --
 ALTER TABLE `course`
-  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=110;
+  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
 
 --
 -- AUTO_INCREMENT for table `course_offering`
 --
 ALTER TABLE `course_offering`
-  MODIFY `course_offering_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `course_offering_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `enrollment`
 --
 ALTER TABLE `enrollment`
-  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `faculty`
@@ -438,7 +447,7 @@ ALTER TABLE `schedule`
 -- AUTO_INCREMENT for table `student`
 --
 ALTER TABLE `student`
-  MODIFY `StudentID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100007;
+  MODIFY `StudentID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100008;
 
 --
 -- Constraints for dumped tables
@@ -457,7 +466,7 @@ ALTER TABLE `course_offering`
 -- Constraints for table `enrollment`
 --
 ALTER TABLE `enrollment`
-  ADD CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`StudentID`),
+  ADD CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE,
   ADD CONSTRAINT `enrollment_ibfk_2` FOREIGN KEY (`course_offering_id`) REFERENCES `course_offering` (`course_offering_id`);
 
 --
@@ -477,13 +486,13 @@ ALTER TABLE `prerequisite`
 -- Constraints for table `student_fulltime`
 --
 ALTER TABLE `student_fulltime`
-  ADD CONSTRAINT `student_fulltime_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`);
+  ADD CONSTRAINT `student_fulltime_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `student_parttime`
 --
 ALTER TABLE `student_parttime`
-  ADD CONSTRAINT `student_parttime_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`);
+  ADD CONSTRAINT `student_parttime_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `supervises`

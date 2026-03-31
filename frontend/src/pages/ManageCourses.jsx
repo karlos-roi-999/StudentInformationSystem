@@ -40,7 +40,9 @@ function ManageCourses({ refresh, refreshTrigger }) {
     try {
       if (editingId) { await axios.put(`/api/course/${editingId}`, formData); }
       else { await axios.post('/api/course', formData); }
-      setShowModal(false); refresh();
+      setShowModal(false); 
+      refresh();
+      alert(`New course created: "${formData.course_name}"`)
     } catch (error) { alert('Error: ' + error.message); }
   }
 

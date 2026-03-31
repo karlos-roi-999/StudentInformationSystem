@@ -14,13 +14,15 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
   const [students, setStudents] = useState([]);
   const [offerings, setOfferings] = useState([]);
   const [avgGrades, setAvgGrades] = useState([]);
+  const [sortBy, setSortBy] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [gradeModal, setGradeModal] = useState({ open: false, id: null, studentName: '', courseName: '', grade: '' });
   const [formData, setFormData] = useState({ student_id: '', course_offering_id: '', enrollment_status: 'Enrolled' });
 
   useEffect(() => {
+    const sortParam = sortBy ? `?sort_by=${sortBy}` : '';
     Promise.all([
-      axios.get('/api/enrollments'),
+      axios.get(`/api/enrollments${sortParam}`),
       axios.get('/api/students'),
       axios.get('/api/course-offerings'),
       axios.get('/api/enrollments/avg-grades')
@@ -32,14 +34,14 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
         setAvgGrades(avgRes.data);
       })
       .catch(err => console.error('Error:', err));
-  }, [refreshTrigger]);
+  }, [refreshTrigger, sortBy]);
 
   function handleChange(e) { setFormData({ ...formData, [e.target.name]: e.target.value }); }
 
   async function handleSubmit(e) {
     e.preventDefault();
     try { await axios.post('/api/enrollments', formData); setShowModal(false); refresh(); }
-    catch (error) { alert('Error: ' + error.message); }
+    catch (error) { alert(error.response?.data?.message || 'Error: ' + error.message); }
   }
 
   // Update Enrolment Status inline
@@ -80,7 +82,18 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div><h1 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>Student Enrolments</h1><p style={{ color: '#6b7280', fontSize: '0.9rem' }}>Manage student enrolments and update status</p></div>
-        <button onClick={() => setShowModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#111827', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}><Plus size={16} /> Add Enrolment</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <label style={{ fontSize: '0.8rem', fontWeight: 500, color: '#6b7280', whiteSpace: 'nowrap' }}>Sort by:</label>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}
+              style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.85rem', backgroundColor: '#fafafa', cursor: 'pointer' }}>
+              <option value="">Default</option>
+              <option value="student_name">Student Name</option>
+              <option value="course_name">Course Name</option>
+            </select>
+          </div>
+          <button onClick={() => setShowModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#111827', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}><Plus size={16} /> Add Enrolment</button>
+        </div>
       </div>
       <div style={{ backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>

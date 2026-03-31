@@ -2,9 +2,14 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// GET all enrollments
+// GET all enrollments (supports ?sort_by=student_name or ?sort_by=course_name)
 router.get('/', async (req, res) => {
     try {
+        const sortBy = req.query.sort_by;
+        let orderClause = 'ORDER BY e.enrollment_id';
+        if (sortBy === 'student_name') orderClause = 'ORDER BY s.LastName ASC, s.FirstName ASC';
+        else if (sortBy === 'course_name') orderClause = 'ORDER BY c.course_name ASC, co.section_name ASC';
+
         const [result] = await db.query(`
             SELECT e.enrollment_id, e.student_id, e.enrollment_date, e.enrollment_status, e.grade,
             s.FirstName AS student_first_name, s.LastName AS student_last_name,
@@ -20,6 +25,7 @@ router.get('/', async (req, res) => {
             JOIN Academic_Term at2 ON co.term_id = at2.term_id
             JOIN Schedule sch ON co.time_slot_id = sch.time_slot_id
             JOIN Faculty f ON co.faculty_id = f.faculty_id
+            ${orderClause}
         `);
 
         if(result.length === 0) {
@@ -33,7 +39,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET average grade per course (nested aggregation with GROUP BY)
+// GET average grade per course
 router.get('/avg-grades', async (req, res) => {
     try {
         const [result] = await db.query(`
@@ -92,6 +98,27 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const {student_id, course_offering_id, enrollment_date, enrollment_status} = req.body;
+
+        // Check for schedule conflict: same time_slot_id AND same term for this student
+        const [conflicts] = await db.query(`
+            SELECT e.enrollment_id, c.course_name, co.section_name
+            FROM Enrollment e
+            JOIN Course_Offering co ON e.course_offering_id = co.course_offering_id
+            JOIN Course c ON co.course_id = c.course_id
+            JOIN Course_Offering new_co ON new_co.course_offering_id = ?
+            WHERE e.student_id = ?
+              AND e.enrollment_status = 'Enrolled'
+              AND co.time_slot_id = new_co.time_slot_id
+              AND co.term_id = new_co.term_id
+        `, [course_offering_id, student_id]);
+
+        if (conflicts.length > 0) {
+            const conflict = conflicts[0];
+            return res.status(409).json({
+                message: `Schedule conflict: this time slot is already taken by "${conflict.course_name} - ${conflict.section_name}"`
+            });
+        }
+
         const [result] = await db.query(
             'INSERT INTO Enrollment (student_id, course_offering_id, enrollment_date, enrollment_status) VALUES (?, ?, CURDATE(), ?)',
             [student_id, course_offering_id, enrollment_status]

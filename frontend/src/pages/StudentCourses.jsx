@@ -33,7 +33,10 @@ function StudentCourses({ refresh, refreshTrigger, userInfo }) {
       await axios.post('/api/enrollments', { student_id: STUDENT_ID, course_offering_id: offeringId, enrollment_status: 'Enrolled' });
       alert('Enrolled successfully!');
       refresh();
-    } catch (error) { alert('Enrolment failed: ' + error.message); }
+    } catch (error) {
+      const msg = error.response?.data?.message || error.message;
+      alert('Enrolment failed: ' + msg);
+    }
     setEnrolling(false);
   }
 

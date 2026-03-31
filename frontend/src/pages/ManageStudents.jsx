@@ -96,6 +96,7 @@ function ManageStudents({ refresh, refreshTrigger }) {
   // DELETE student
   async function handleDelete(id) {
     if (!window.confirm('Delete this student?')) return;
+    if (!window.confirm('Are you sure about this action? Deleting a student is permanent and would delete them from the records of this school')) return;
     try {
       await axios.delete(`/api/students/${id}`);
       refresh();

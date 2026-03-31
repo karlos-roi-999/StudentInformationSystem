@@ -19,7 +19,7 @@ Then set up the database:
 3. Select the `student_info_system_db` database
 4. Click the **SQL** tab at the top
 5. Open `backend/student_info_system_db.sql` from this project in a text editor, copy the entire contents, and paste it into the SQL tab
-6. Click **Go** to execute — this will create all tables, seed the data, and set up the stored procedure
+6. Click **Go** to execute; this will create all tables, seed the data, and set up the stored procedure
 
 ### 2. Install Dependencies
 Open a terminal and install packages for the root, backend, and frontend:

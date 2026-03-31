@@ -17,6 +17,7 @@ const tdStyle = { padding: '12px 16px', borderBottom: '1px solid #f3f4f6' };
 
 function ManageStudents({ refresh, refreshTrigger }) {
   const [students, setStudents] = useState([]);
+  const [hoveredId, setHoveredId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const initialForm = {
@@ -133,7 +134,17 @@ function ManageStudents({ refresh, refreshTrigger }) {
               const id = s.StudentID || s.student_id;
               const status = s.EnrolmentStatus || s.EnrollmentStatus || s.enrollment_status || 'Active';
               return (
-                <tr key={id}>
+                <tr
+                  key={id}
+                  onMouseEnter={() => setHoveredId(id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  style={{
+                    transform: hoveredId === id ? 'scale(1.01)' : 'scale(1)',
+                    boxShadow: hoveredId === id ? '0 4px 12px rgba(0, 0, 0, 0.1)' : 'none',
+                    transition: 'transform 0.15s ease-in-out, box-shadow 0.15s ease',
+                    backgroundColor: hoveredId === id ? '#f9fafb' : 'transparent'
+                  }}
+                >
                   <td style={tdStyle}>{id}</td>
                   <td style={{ ...tdStyle, fontWeight: 500 }}>{s.FirstName || s.first_name} {s.LastName || s.last_name}</td>
                   <td style={tdStyle}>{s.Email || s.email}</td>

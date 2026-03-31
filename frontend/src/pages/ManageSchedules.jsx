@@ -16,6 +16,7 @@ function formatTime(timeStr) {
 
 function ManageSchedules({ refresh, refreshTrigger }) {
   const [schedules, setSchedules] = useState([]);
+  const [hoveredId, setHoveredId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const initialForm = { days_of_week: 'MWF', start_time: '08:00', end_time: '09:00' };
@@ -70,7 +71,17 @@ function ManageSchedules({ refresh, refreshTrigger }) {
             schedules.map(s => {
               const id = s.TimeSlotID || s.time_slot_id;
               return (
-                <tr key={id}>
+                <tr
+                  key={id}
+                  onMouseEnter={() => setHoveredId(id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  style={{
+                    transform: hoveredId === id ? 'scale(1.01)' : 'scale(1)',
+                    boxShadow: hoveredId === id ? '0 4px 12px rgba(0, 0, 0, 0.1)' : 'none',
+                    transition: 'transform 0.15s ease-in-out, box-shadow 0.15s ease',
+                    backgroundColor: hoveredId === id ? '#f9fafb' : 'transparent'
+                  }}
+                >
                   <td style={tdStyle}>{id}</td>
                   <td style={tdStyle}><span style={{ padding: '4px 12px', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#e5e7eb', color: '#374151' }}>{s.DaysOfWeek || s.days_of_week}</span></td>
                   <td style={tdStyle}>{formatTime(s.StartTime || s.start_time)}</td>

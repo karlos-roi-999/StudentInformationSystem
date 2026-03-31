@@ -51,7 +51,7 @@ function AdminDashboard() {
       <h2 style={{ fontSize: '1.15rem', marginBottom: '1.25rem' }}>Core Functions</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
         {functionCards.map(card => (
-          <FunctionCard key={card.label} {...card} />
+          <FunctionCard key={card.label} {...card}/>
         ))}
       </div>
     </div>

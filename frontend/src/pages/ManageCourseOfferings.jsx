@@ -11,6 +11,7 @@ function formatTime(t) { if (!t) return ''; const [h, m] = t.split(':'); const h
 
 function ManageCourseOfferings({ refresh, refreshTrigger }) {
   const [offerings, setOfferings] = useState([]);
+  const [hoveredId, setHoveredId] = useState(null);
   const [courses, setCourses] = useState([]);
   const [terms, setTerms] = useState([]);
   const [schedules, setSchedules] = useState([]);
@@ -82,7 +83,17 @@ function ManageCourseOfferings({ refresh, refreshTrigger }) {
             offerings.map(o => {
               const id = o.CourseOfferingID || o.course_offering_id;
               return (
-                <tr key={id}>
+                <tr
+                  key={id}
+                  onMouseEnter={() => setHoveredId(id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  style={{
+                    transform: hoveredId === id ? 'scale(1.01)' : 'scale(1)',
+                    boxShadow: hoveredId === id ? '0 4px 12px rgba(0, 0, 0, 0.1)' : 'none',
+                    transition: 'transform 0.15s ease-in-out, box-shadow 0.15s ease',
+                    backgroundColor: hoveredId === id ? '#f9fafb' : 'transparent'
+                  }}
+                >
                   <td style={{ ...tdStyle, fontWeight: 500 }}>{o.SectionName || o.section_name}</td>
                   <td style={tdStyle}>{o.CourseName || o.course_name}</td>
                   <td style={tdStyle}>{(o.TermName || o.term_name)} {o.SchoolYear || o.school_year}</td>

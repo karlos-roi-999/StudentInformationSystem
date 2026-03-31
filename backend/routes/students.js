@@ -3,14 +3,6 @@ const router = express.Router();
 const db = require('../db');
 const bcrypt = require('bcrypt');
 
-// The JOIN query explained for beginners:
-//   LEFT JOIN means: "get everything from Student, and if a matching row
-//   exists in Student_FullTime or Student_PartTime, attach those columns too.
-//   If no match exists, those columns just come back as null."
-//
-//   We then use plain JavaScript (if/else) to figure out student_type
-//   instead of putting that logic in SQL — easier to read and explain!
-
 const STUDENT_JOIN_QUERY = `
     SELECT
         s.*,
@@ -23,7 +15,7 @@ const STUDENT_JOIN_QUERY = `
     LEFT JOIN Student_PartTime pt ON s.StudentID = pt.StudentID
 `;
 
-// Helper: figure out student_type from which subclass columns came back
+// figures out student_type from which subclass columns came back
 function deriveStudentType(row) {
     if (row.ExtraCurricularActivities !== null || row.GuardianContactInfo !== null) {
         return 'FullTime';

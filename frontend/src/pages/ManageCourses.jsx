@@ -9,6 +9,7 @@ const tdStyle = { padding: '12px 16px', borderBottom: '1px solid #f3f4f6' };
 
 function ManageCourses({ refresh, refreshTrigger }) {
   const [courses, setCourses] = useState([]);
+  const [hoveredId, setHoveredId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const initialForm = { course_name: '', subject_area: 'Math', grade_level: '10', course_description: '' };
@@ -70,7 +71,17 @@ function ManageCourses({ refresh, refreshTrigger }) {
             ) : courses.map(c => {
               const id = c.CourseID || c.course_id;
               return (
-                <tr key={id}>
+                <tr
+                  key={id}
+                  onMouseEnter={() => setHoveredId(id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  style={{
+                    transform: hoveredId === id ? 'scale(1.01)' : 'scale(1)',
+                    boxShadow: hoveredId === id ? '0 4px 12px rgba(0, 0, 0, 0.1)' : 'none',
+                    transition: 'transform 0.15s ease-in-out, box-shadow 0.15s ease',
+                    backgroundColor: hoveredId === id ? '#f9fafb' : 'transparent'
+                  }}
+                >
                   <td style={tdStyle}>{id}</td>
                   <td style={{ ...tdStyle, fontWeight: 500 }}>{c.CourseName || c.course_name}</td>
                   <td style={tdStyle}><span style={{ padding: '4px 12px', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#e5e7eb', color: '#374151' }}>{c.SubjectArea || c.subject_area}</span></td>

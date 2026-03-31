@@ -9,6 +9,7 @@ const tdStyle = { padding: '12px 16px', borderBottom: '1px solid #f3f4f6' };
 
 function ManageFaculty({ refresh, refreshTrigger }) {
   const [faculty, setFaculty] = useState([]);
+  const [hoveredId, setHoveredId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const initialForm = { first_name: '', last_name: '', email: '', phone_number: '', position: 'Teacher' };
@@ -71,7 +72,17 @@ function ManageFaculty({ refresh, refreshTrigger }) {
             ) : faculty.map(f => {
               const id = f.FacultyID || f.faculty_id;
               return (
-                <tr key={id}>
+                <tr
+                  key={id}
+                  onMouseEnter={() => setHoveredId(id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  style={{
+                    transform: hoveredId === id ? 'scale(1.01)' : 'scale(1)',
+                    boxShadow: hoveredId === id ? '0 4px 12px rgba(0, 0, 0, 0.1)' : 'none',
+                    transition: 'transform 0.15s ease-in-out, box-shadow 0.15s ease',
+                    backgroundColor: hoveredId === id ? '#f9fafb' : 'transparent'
+                  }}
+                >
                   <td style={tdStyle}>{id}</td>
                   <td style={{ ...tdStyle, fontWeight: 500 }}>{f.FirstName || f.first_name} {f.LastName || f.last_name}</td>
                   <td style={tdStyle}>{f.Email || f.email}</td>

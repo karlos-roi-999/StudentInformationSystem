@@ -9,6 +9,7 @@ const tdStyle = { padding: '12px 16px', borderBottom: '1px solid #f3f4f6' };
 
 function ManagePrerequisites({ refresh, refreshTrigger }) {
   const [prereqs, setPrereqs] = useState([]);
+  const [hoveredIdx, setHoveredIdx] = useState(null);
   const [courses, setCourses] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ course_id: '', prereq_course_id: '' });
@@ -49,7 +50,17 @@ function ManagePrerequisites({ refresh, refreshTrigger }) {
           <tbody>
             {prereqs.length === 0 ? <tr><td colSpan="3" style={{ ...tdStyle, textAlign: 'center', color: '#9ca3af' }}>No prerequisites set.</td></tr> :
             prereqs.map((p, i) => (
-              <tr key={i}>
+              <tr
+                key={i}
+                onMouseEnter={() => setHoveredIdx(i)}
+                onMouseLeave={() => setHoveredIdx(null)}
+                style={{
+                  transform: hoveredIdx === i ? 'scale(1.01)' : 'scale(1)',
+                  boxShadow: hoveredIdx === i ? '0 4px 12px rgba(0, 0, 0, 0.1)' : 'none',
+                  transition: 'transform 0.15s ease-in-out, box-shadow 0.15s ease',
+                  backgroundColor: hoveredIdx === i ? '#f9fafb' : 'transparent'
+                }}
+              >
                 <td style={{ ...tdStyle, fontWeight: 500 }}>{p.CourseName || p.course_name}</td>
                 <td style={tdStyle}>{p.PrerequisiteName || p.prerequisite_name}</td>
                 <td style={tdStyle}><button onClick={() => handleDelete(p.CourseID || p.course_id, p.PrereqCourseID || p.prereq_course_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={16} /></button></td>

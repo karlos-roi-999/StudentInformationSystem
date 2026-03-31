@@ -9,6 +9,7 @@ const tdStyle = { padding: '12px 16px', borderBottom: '1px solid #f3f4f6' };
 
 function ManageSupervises({ refresh, refreshTrigger }) {
   const [supervisions, setSupervisions] = useState([]);
+  const [hoveredIdx, setHoveredIdx] = useState(null);
   const [faculty, setFaculty] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ supervisor_id: '', supervisee_id: '' });
@@ -49,7 +50,17 @@ function ManageSupervises({ refresh, refreshTrigger }) {
           <tbody>
             {supervisions.length === 0 ? <tr><td colSpan="3" style={{ ...tdStyle, textAlign: 'center', color: '#9ca3af' }}>No supervisions set.</td></tr> :
             supervisions.map((s, i) => (
-              <tr key={i}>
+              <tr
+                key={i}
+                onMouseEnter={() => setHoveredIdx(i)}
+                onMouseLeave={() => setHoveredIdx(null)}
+                style={{
+                  transform: hoveredIdx === i ? 'scale(1.01)' : 'scale(1)',
+                  boxShadow: hoveredIdx === i ? '0 4px 12px rgba(0, 0, 0, 0.1)' : 'none',
+                  transition: 'transform 0.15s ease-in-out, box-shadow 0.15s ease',
+                  backgroundColor: hoveredIdx === i ? '#f9fafb' : 'transparent'
+                }}
+              >
                 <td style={{ ...tdStyle, fontWeight: 500 }}>{s.SupervisorFirstName || s.supervisor_first_name} {s.SupervisorLastName || s.supervisor_last_name}</td>
                 <td style={tdStyle}>{s.SuperviseeFirstName || s.supervisee_first_name} {s.SuperviseeLastName || s.supervisee_last_name}</td>
                 <td style={tdStyle}><button onClick={() => handleDelete(s.SupervisorID || s.supervisor_id, s.SuperviseeID || s.supervisee_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={16} /></button></td>

@@ -10,6 +10,7 @@ const tdStyle = { padding: '12px 16px', borderBottom: '1px solid #f3f4f6' };
 
 function ManageEnrollments({ refresh, refreshTrigger }) {
   const [enrollments, setEnrollments] = useState([]);
+  const [hoveredId, setHoveredId] = useState(null);
   const [students, setStudents] = useState([]);
   const [offerings, setOfferings] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -64,7 +65,17 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
               const id = e.EnrollmentID || e.enrollment_id;
               const status = e.EnrollmentStatus || e.enrollment_status;
               return (
-                <tr key={id}>
+                <tr
+                  key={id}
+                  onMouseEnter={() => setHoveredId(id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  style={{
+                    transform: hoveredId === id ? 'scale(1.01)' : 'scale(1)',
+                    boxShadow: hoveredId === id ? '0 4px 12px rgba(0, 0, 0, 0.1)' : 'none',
+                    transition: 'transform 0.15s ease-in-out, box-shadow 0.15s ease',
+                    backgroundColor: hoveredId === id ? '#f9fafb' : 'transparent'
+                  }}
+                >
                   <td style={{ ...tdStyle, fontWeight: 500 }}>{e.StudentFirstName || e.student_first_name} {e.StudentLastName || e.student_last_name}</td>
                   <td style={tdStyle}>{e.CourseName || e.course_name}</td>
                   <td style={tdStyle}>{e.SectionName || e.section_name}</td>

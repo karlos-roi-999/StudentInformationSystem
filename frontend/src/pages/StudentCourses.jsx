@@ -63,15 +63,15 @@ function StudentCourses({ refresh, refreshTrigger, userInfo }) {
       <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Courses</h1>
       <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>Browse course offerings and manage enrolments.</p>
 
-      {/* Tabs */}
+      {/* Tab buttons */}
       <div style={{ borderBottom: '1px solid #e5e7eb', marginBottom: '2rem', display: 'flex', gap: '0.5rem' }}>
         {tabBtn('browse', 'View Course Listings')}
         {tabBtn('my', 'My Courses')}
       </div>
 
-      {/* Tab 1: Browse */}
+      {/* Browse available courses */}
       {tab === 'browse' && (() => {
-        // Filter offerings to only show courses matching the student's grade level
+        // Only show courses that match this student's grade level
         const studentGrade = userInfo?.grade_level;
         const filtered = studentGrade
           ? offerings.filter(o => String(o.grade_level) === String(studentGrade))
@@ -83,7 +83,7 @@ function StudentCourses({ refresh, refreshTrigger, userInfo }) {
           filtered.map(o => {
             const id = o.CourseOfferingID || o.course_offering_id;
 
-            // Check if student is already enrolled in this offering
+            // See if this student is already enrolled in this section
             const enrollment = myEnrollments.find(e =>
               (e.course_offering_id) == id && (e.enrollment_status) === 'Enrolled'
             );
@@ -126,7 +126,7 @@ function StudentCourses({ refresh, refreshTrigger, userInfo }) {
         );
       })()}
 
-      {/* Tab 2: My Courses */}
+      {/* Student's enrolled courses */}
       {tab === 'my' && (
         <div style={{ backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>

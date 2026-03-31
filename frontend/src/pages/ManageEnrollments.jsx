@@ -44,13 +44,13 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
     catch (error) { alert(error.response?.data?.message || 'Error: ' + error.message); }
   }
 
-  // Update Enrolment Status inline
+  // Change enrollment status inline from the dropdown
   async function handleStatusChange(id, newStatus) {
     try { await axios.put(`/api/enrollments/${id}`, { enrollment_status: newStatus }); refresh(); }
     catch (error) { alert('Update failed: ' + error.message); }
   }
 
-  // Open grade modal for a specific enrollment
+  // Show grade editing modal for a specific student's enrollment
   function openGradeModal(enrollment) {
     const id = enrollment.EnrollmentID || enrollment.enrollment_id;
     setGradeModal({
@@ -61,7 +61,7 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
     });
   }
 
-  // Save grade from modal
+  // Save the grade value from the modal
   async function handleGradeSave() {
     const val = gradeModal.grade === '' ? null : parseFloat(gradeModal.grade);
     if (val !== null && (val < 1 || val > 100)) return alert('Grade must be between 1.00 and 100.00');
@@ -143,7 +143,7 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
         </table>
       </div>
 
-      {/* Average Grade Per Course */}
+      {/* Course grade averages (nested aggregation) */}
       {avgGrades.length > 0 && (
         <div style={{ marginTop: '2rem', backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
           <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #e5e7eb' }}>
@@ -169,7 +169,7 @@ function ManageEnrollments({ refresh, refreshTrigger }) {
         </div>
       )}
 
-      {/* Grade Edit Modal */}
+      {/* Modal for editing a student's grade */}
       {gradeModal.open && (
         <Modal title="Edit Grade" onClose={() => setGradeModal({ ...gradeModal, open: false })}>
           <div style={{ marginBottom: '1rem' }}>

@@ -11,7 +11,7 @@ const Modal = ({ title, onClose, children }) => {
         width: '100%', maxWidth: '500px', maxHeight: '90vh',
         overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
       }}>
-        {/* Header */}
+        {/* Title bar with close button */}
         <div style={{
           padding: '1.5rem', borderBottom: '1px solid #e5e7eb',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center'

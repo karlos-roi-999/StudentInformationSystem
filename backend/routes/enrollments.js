@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// GET all enrollments (supports ?sort_by=student_name or ?sort_by=course_name)
+// List all enrollments with full details (supports sorting via ?sort_by query param)
 router.get('/', async (req, res) => {
     try {
         const sortBy = req.query.sort_by;
@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET average grade per course
+// Aggregate: average grade per course (nested aggregation with HAVING)
 router.get('/avg-grades', async (req, res) => {
     try {
         const [result] = await db.query(`
@@ -62,7 +62,7 @@ router.get('/avg-grades', async (req, res) => {
     }
 });
 
-// GET a single enrollment by ID (with JOINs)
+// Get one enrollment by ID with all joined info
 router.get('/:id', async (req, res) => {
     try {
         const [result] = await db.query(`
@@ -94,12 +94,12 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-// POST (Create) a new enrollment
+// Enrol a student — checks for schedule conflicts first
 router.post('/', async (req, res) => {
     try {
         const {student_id, course_offering_id, enrollment_date, enrollment_status} = req.body;
 
-        // Check for schedule conflict: same time_slot_id AND same term for this student
+        // Prevent double-booking: make sure this student doesn't already have class at the same time slot + term
         const [conflicts] = await db.query(`
             SELECT e.enrollment_id, c.course_name, co.section_name
             FROM Enrollment e
@@ -130,7 +130,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT (Update) an enrollment
+// Update enrollment fields (status, grade, etc.)
 router.put('/:id', async (req, res) => {
     try {
         const fields = [];
@@ -162,7 +162,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE an enrollment
+// Remove an enrollment record
 router.delete('/:id', async (req, res) => {
     try {
         const [result] = await db.query('DELETE FROM Enrollment WHERE enrollment_id = ?', [req.params.id]);

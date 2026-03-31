@@ -34,7 +34,7 @@ function AdminDashboard() {
       <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Dashboard Overview</h1>
       <p style={{ color: '#6b7280', marginBottom: '2rem' }}>Welcome to the administration panel.</p>
 
-      {/* Stat Cards */}
+      {/* Overview stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }}>
         <StatCard label="Total Students" value={stats.students} icon={Users} />
         <StatCard label="Total Faculty" value={stats.faculty} icon={UserSquare} />
@@ -42,7 +42,7 @@ function AdminDashboard() {
         <StatCard label="Active Enrolments" value={stats.enrollments} icon={ClipboardList} />
       </div>
 
-      {/* Function Cards */}
+      {/* Quick links to management pages */}
       <h2 style={{ fontSize: '1.15rem', marginBottom: '1.25rem' }}>Core Functions</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
         {functionCards.map(card => (

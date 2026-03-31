@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// GET all schedules
+// List all time slots
 router.get('/', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT * FROM Schedule');
@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET a single schedule by ID
+// Get one time slot by ID
 router.get('/:id', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT * FROM Schedule WHERE time_slot_id = ?', [req.params.id]);
@@ -27,7 +27,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// POST (Create) a new schedule
+// Add a new time slot
 router.post('/', async (req, res) => {
     try {
         const {days_of_week, start_time, end_time} = req.body;
@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT (Update) a schedule
+// Update time slot fields
 router.put('/:id', async (req, res) => {
     try {
         const fields = [];
@@ -74,7 +74,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE a schedule
+// Remove a time slot by ID
 router.delete('/:id', async (req, res) => {
     try {
         const [result] = await db.query('DELETE FROM Schedule WHERE time_slot_id = ?', [req.params.id]);

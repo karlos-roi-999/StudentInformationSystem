@@ -24,7 +24,7 @@ function AdminProfile({ userInfo }) {
         backgroundColor: 'white', borderRadius: '16px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.05)', padding: '2rem', maxWidth: '600px'
       }}>
-        {/* Avatar + Name */}
+        {/* Profile avatar and name */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e5e7eb' }}>
           <div style={{
             width: '64px', height: '64px', borderRadius: '50%',
@@ -45,7 +45,7 @@ function AdminProfile({ userInfo }) {
           </div>
         </div>
 
-        {/* Fields */}
+        {/* Account details */}
         {fieldRow(<Mail size={16} color="#6b7280" />, 'Email', userInfo?.email)}
         {fieldRow(<Phone size={16} color="#6b7280" />, 'Phone', userInfo?.phone_number)}
         {fieldRow(<Briefcase size={16} color="#6b7280" />, 'Position', userInfo?.position)}

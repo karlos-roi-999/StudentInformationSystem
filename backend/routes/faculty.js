@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../db');
 const bcrypt = require('bcrypt');
 
-// GET all faculty members
+// List all faculty
 router.get('/', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT * FROM Faculty');
@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET a single faculty member by ID
+// Get one faculty member by ID
 router.get('/:id', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT * FROM Faculty WHERE faculty_id = ?', [req.params.id]);
@@ -28,12 +28,12 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// POST (Create) a new faculty member
+// Add a new faculty member with an auto-generated password
 router.post('/', async (req, res) => {
     try {
         const {first_name, last_name, email, phone_number, position} = req.body;
 
-        // Generate default password: (FirstLetter)(LastName)(random 2 digits) e.g. MThompson73
+        // Auto-generate a password like "MThompson73" for new faculty
         const randomNum = String(Math.floor(Math.random() * 100)).padStart(2, '0');
         const defaultPassword = first_name.charAt(0).toUpperCase() + last_name + randomNum;
         const password_hash = await bcrypt.hash(defaultPassword, 10);
@@ -50,7 +50,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT (Update) a faculty member
+// Update faculty member fields dynamically
 router.put('/:id', async (req, res) => {
     try {
         const fields = [];
@@ -82,7 +82,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE a faculty member
+// Remove a faculty member by ID
 router.delete('/:id', async (req, res) => {
     try {
         const [result] = await db.query('DELETE FROM Faculty WHERE faculty_id = ?', [req.params.id]);

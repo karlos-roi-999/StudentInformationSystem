@@ -35,7 +35,7 @@ function ManageStudents({ refresh, refreshTrigger }) {
     setShowModal(true);
   }
 
-  // GET all students
+  // Load students from API
   useEffect(() => {
     axios.get('/api/students')
       .then(response => { setStudents(response.data); })
@@ -46,7 +46,7 @@ function ManageStudents({ refresh, refreshTrigger }) {
     setFormData({ ...formData, [e.target.name]: e.target.value }); 
   }
 
-  // POST or PUT student
+  // Save new or edited student
   async function handleSubmit(e) {
     e.preventDefault();
     const payload = { ...formData };
@@ -72,7 +72,7 @@ function ManageStudents({ refresh, refreshTrigger }) {
 
   function handleEditClick(student) {
     const id = student.StudentID || student.student_id;
-    // student_type is now returned by the API via LEFT JOIN — 'FullTime', 'PartTime', or null
+    // student_type comes from the API via LEFT JOIN — 'FullTime', 'PartTime', or null
     const type = student.student_type || 'FullTime';
     setEditingId(id);
     setFormData({
@@ -84,7 +84,7 @@ function ManageStudents({ refresh, refreshTrigger }) {
       grade_level: student.GradeLevel || '10',
       enrollment_status: student.EnrolmentStatus || 'Active',
       student_type: type,
-      // Subclass fields — the API now includes these from the JOIN
+      // FullTime/PartTime fields from the JOIN
       extra_curricular: student.ExtraCurricularActivities || '',
       guardian_contact_info: student.GuardianContactInfo || '',
       reason_for_part_time: student.ReasonForPartTime || '',
@@ -93,7 +93,7 @@ function ManageStudents({ refresh, refreshTrigger }) {
     setShowModal(true);
   }
 
-  // DELETE student
+  // Delete student (with double confirmation)
   async function handleDelete(id) {
     if (!window.confirm('Delete this student?')) return;
     if (!window.confirm('Are you sure about this action? Deleting a student is permanent and would delete them from the records of this school')) return;
@@ -119,7 +119,7 @@ function ManageStudents({ refresh, refreshTrigger }) {
         </button>
       </div>
 
-      {/* Table */}
+      {/* Students table */}
       <div style={{ backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
@@ -166,7 +166,7 @@ function ManageStudents({ refresh, refreshTrigger }) {
         </table>
       </div>
 
-      {/* Add Student Modal */}
+      {/* Add/Edit Student Modal */}
       {showModal && (
         <Modal title={editingId ? "Edit Student" : "Register New Student"} onClose={() => setShowModal(false)}>
           <form onSubmit={handleSubmit}>

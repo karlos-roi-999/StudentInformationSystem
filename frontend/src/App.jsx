@@ -22,7 +22,7 @@ import StudentProfile from './pages/StudentProfile.jsx';
 
 function App() {
 
-  // Restore login state from localStorage on mount
+  // Pull saved login state from localStorage so refreshing doesn't log you out
   const [userRole, setUserRole] = useState(() => {
     const saved = localStorage.getItem('user');
     return saved ? JSON.parse(saved).role : null;
@@ -46,7 +46,7 @@ function App() {
     localStorage.removeItem('user');
   }
 
-  // If not logged in, only show Login
+  // Not logged in? Only show the login page
   if (!userRole) {
     return (
       <Routes>
@@ -62,7 +62,7 @@ function App() {
         <Topbar userRole={userRole} userInfo={userInfo} onLogout={handleLogout} />
         <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
           <Routes>
-            {/* Admin Routes — accessible by Admin and SuperAdmin */}
+            {/* Admin pages — Admin and SuperAdmin only */}
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/admin/dashboard" element={
               <ProtectedRoute allowedRoles={['Admin', 'SuperAdmin']} userRole={userRole}>
@@ -120,7 +120,7 @@ function App() {
               </ProtectedRoute>
             } />
 
-            {/* Student Routes — accessible by Student and SuperAdmin */}
+            {/* Student pages — Student and SuperAdmin only */}
             <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
             <Route path="/student/dashboard" element={
               <ProtectedRoute allowedRoles={['Student', 'SuperAdmin']} userRole={userRole}>
@@ -143,7 +143,7 @@ function App() {
               </ProtectedRoute>
             } />
 
-            {/* Catch-all */}
+            {/* Default redirect based on role */}
             <Route path="*" element={
               <Navigate to={
                 userRole === 'Student' ? '/student/dashboard' : '/admin/dashboard'

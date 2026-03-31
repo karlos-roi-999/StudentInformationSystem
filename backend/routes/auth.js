@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'sis-secret-key-2026';
 
-// POST /api/auth/login
+// Login — checks Faculty table first, then Student table
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -15,7 +15,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Email and password are required' });
         }
 
-        // Try Faculty table first
+        // Look for a matching faculty account
         const [faculty] = await db.query(
             'SELECT faculty_id, first_name, last_name, email, password_hash, phone_number, position FROM Faculty WHERE email = ?',
             [email]
@@ -29,7 +29,7 @@ router.post('/login', async (req, res) => {
                 return res.status(401).json({ message: 'Invalid password' });
             }
 
-            // Michael Thompson gets SuperAdmin role
+            // Hard-coded SuperAdmin check (only Michael Thompson has this role)
             const isSuperAdmin = user.first_name === 'Michael' && user.last_name === 'Thompson';
             const role = isSuperAdmin ? 'SuperAdmin' : 'Admin';
 
@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
                 { expiresIn: '8h' }
             );
 
-            return res.json({
+            return res.json({  
                 message: 'Login successful',
                 token,
                 user: {
@@ -54,7 +54,7 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Try Student table
+        // No faculty match — try the Student table instead
         const [students] = await db.query(
             'SELECT StudentID, FirstName, LastName, Email, password_hash, GradeLevel FROM Student WHERE Email = ?',
             [email]
@@ -88,7 +88,7 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // No user found in either table
+        // Email doesn't exist in either table
         return res.status(401).json({ message: 'No account found with that email' });
 
     } catch (err) {

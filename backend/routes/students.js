@@ -15,7 +15,7 @@ const STUDENT_JOIN_QUERY = `
     LEFT JOIN Student_PartTime pt ON s.StudentID = pt.StudentID
 `;
 
-// figures out student_type from which subclass columns came back
+// Determines FullTime vs PartTime based on which subclass columns have data
 function deriveStudentType(row) {
     if (row.ExtraCurricularActivities !== null || row.GuardianContactInfo !== null) {
         return 'FullTime';
@@ -25,7 +25,7 @@ function deriveStudentType(row) {
     return null;  // student has no subclass row yet
 }
 
-// GET all students
+// Fetch all students with their subclass data (FullTime/PartTime)
 router.get('/', async (req, res) => {
     try {
         const [rows] = await db.query(STUDENT_JOIN_QUERY);
@@ -42,7 +42,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET a single student by ID
+// Fetch one student by ID, including subclass info
 router.get('/:id', async (req, res) => {
     try {
         const [rows] = await db.query(
@@ -53,7 +53,7 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        // Add student_type using the same helper
+        // Attach student_type before sending response
         const student = { ...rows[0], student_type: deriveStudentType(rows[0]) };
 
         res.json(student);
@@ -63,7 +63,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// POST (Create) a new student using EnrolStudent stored procedure
+// Create a new student via the EnrolStudent stored procedure
 router.post('/', async (req, res) => {
     try {
         const {
@@ -73,7 +73,7 @@ router.post('/', async (req, res) => {
             reason_for_part_time, hours_enrolled_per_week
         } = req.body;
 
-        // Generate default password: (FirstLetter)(LastName)(random 2 digits) e.g. KSantos47
+        // Auto-generate a password like "KSantos47" for new students
         const randomNum = String(Math.floor(Math.random() * 100)).padStart(2, '0');
         const defaultPassword = first_name.charAt(0).toUpperCase() + last_name + randomNum;
         const password_hash = await bcrypt.hash(defaultPassword, 10);
@@ -95,7 +95,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT (Update) a student
+// Update a student's base info + their FullTime/PartTime subclass data
 router.put('/:id', async (req, res) => {
     try {
         const {
@@ -113,7 +113,7 @@ router.put('/:id', async (req, res) => {
             phone_number:      'PhoneNumber',
             date_of_birth:     'DateOfBirth',
             grade_level:       'GradeLevel',
-            enrollment_status: 'EnrolmentStatus',  // Note: DB spells it "Enrolment"
+            enrollment_status: 'EnrolmentStatus',  // DB uses British spelling "Enrolment"
         };
 
         const fields = [];
@@ -140,9 +140,9 @@ router.put('/:id', async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        // Update the correct subclass table based on student_type
+        // Handle subclass table — upsert into the correct one, clean up the other
         if (student_type === 'FullTime') {
-            // Check if a FullTime record already exists
+            // Upsert: update if exists, otherwise insert
             const [ftRows] = await db.query(
                 'SELECT StudentID FROM Student_FullTime WHERE StudentID = ?',
                 [req.params.id]
@@ -160,7 +160,7 @@ router.put('/:id', async (req, res) => {
                      VALUES (?, ?, ?)`,
                     [req.params.id, extra_curricular || null, guardian_contact_info || null]
                 );
-                // Remove from PartTime if they switched types
+                // Clean up old subclass if they switched from PartTime
                 await db.query('DELETE FROM Student_PartTime WHERE StudentID = ?', [req.params.id]);
             }
         } else if (student_type === 'PartTime') {
@@ -181,7 +181,7 @@ router.put('/:id', async (req, res) => {
                      VALUES (?, ?, ?)`,
                     [req.params.id, reason_for_part_time || null, hours_enrolled_per_week || null]
                 );
-                // Remove from FullTime if they switched types
+                // Clean up old subclass if they switched from FullTime
                 await db.query('DELETE FROM Student_FullTime WHERE StudentID = ?', [req.params.id]);
             }
         }
@@ -194,7 +194,7 @@ router.put('/:id', async (req, res) => {
 });
 
 
-// DELETE a student (using student id in the parameters)
+// Delete a student by ID
 router.delete('/:id', async (req, res) => {
     try {
         const [result] = await db.query('DELETE FROM Student WHERE StudentID = ?', [req.params.id]);

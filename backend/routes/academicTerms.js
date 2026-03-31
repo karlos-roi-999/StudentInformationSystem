@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// GET ALL
+// List all academic terms
 router.get('/', async (req, res) => {
     try {
         const [result] = await db.query('SELECT * FROM Academic_Term');
@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET a single academic term
+// Get one term by ID
 router.get('/:id', async (req, res) => {
     try {
         const [result] = await db.query('SELECT * FROM Academic_Term WHERE term_id = ?', [req.params.id]);
@@ -27,7 +27,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// POST (Create) a new Academic Term
+// Add a new academic term
 router.post('/', async (req, res) => {
     try {
         const {term_name, school_year, start_date, end_date} = req.body;
@@ -41,7 +41,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT (Update) and Academic Term
+// Update an academic term
 router.put('/:id', async (req, res) => {
     try {
         const fields = [];
@@ -72,7 +72,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE an academic term
+// Remove an academic term by ID
 router.delete('/:id', async (req, res) => {
     try {
         const [result] = await db.query(`DELETE FROM Academic_Term WHERE term_id = ?`, req.params.id);

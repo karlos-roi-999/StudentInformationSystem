@@ -1,19 +1,18 @@
 import { Navigate } from 'react-router-dom';
 
 function ProtectedRoute({ children, allowedRoles, userRole }) {
-  // Not logged in — redirect to login
+  // No user session — kick to login
   if (!userRole) {
     return <Navigate to="/" replace />;
   }
 
-  // SuperAdmin can access everything
+  // SuperAdmin bypasses all role checks
   if (userRole === 'SuperAdmin') {
     return children;
   }
 
-  // Check if current role is allowed
+  // Role not allowed — send them back to their own dashboard
   if (!allowedRoles.includes(userRole)) {
-    // Redirect to the user's own dashboard
     const redirect = userRole === 'Admin' ? '/admin/dashboard' : '/student/dashboard';
     return <Navigate to={redirect} replace />;
   }

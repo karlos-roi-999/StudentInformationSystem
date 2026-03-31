@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// GET all course offerings (with JOINs)
+// List all course offerings with joined course, term, schedule, and faculty info
 router.get('/', async (req, res) => {
     try {
         const [result] = await db.query(
@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET a single course offering by ID (with JOINs)
+// Get one course offering by ID (with all joined details)
 router.get('/:id', async (req, res) => {
     try {
         const [result] = await db.query(
@@ -50,7 +50,7 @@ router.get('/:id', async (req, res) => {
 });
 
 
-// POST (Create) a new course offering
+// Create a new course offering
 router.post('/', async (req, res) => {
     try {
         const {section_name, course_id, term_id, time_slot_id, faculty_id} = req.body;
@@ -65,7 +65,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT (Update) a course offering
+// Update course offering fields
 router.put('/:id', async (req, res) => {
     try {
         const fields = [];
@@ -97,7 +97,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE a course offering
+// Remove a course offering by ID
 router.delete('/:id', async (req, res) => {
     try {
         const [result] = await db.query('DELETE FROM Course_Offering WHERE course_offering_id = ?', [req.params.id]);

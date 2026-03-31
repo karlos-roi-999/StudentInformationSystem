@@ -9,8 +9,8 @@ const inputStyle = {
 
 function Login({ setUserRole, setUserInfo }) {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: 'm.thompson@school.com', password: 'MThompson43' }); // Default Login that routes to SuperAdmin (cuz I always forget the password and email LOL)
-  // ALTERNATIVE LOGIN FOR A STUDENT {email: "karlos.santos@school.com", password:"KSantos11"} ☝️
+  const [formData, setFormData] = useState({ email: 'm.thompson@school.com', password: 'MThompson43' }); // Pre-filled with SuperAdmin creds for easy testing
+  // Student login for testing: {email: "karlos.santos@school.com", password:"KSantos11"}
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -39,14 +39,14 @@ function Login({ setUserRole, setUserInfo }) {
         return;
       }
 
-      // Store token and user info
+      // Save session to localStorage
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
       setUserRole(data.user.role);
       setUserInfo(data.user);
 
-      // Navigate based on role
+      // Redirect to the right dashboard
       if (data.user.role === 'Student') {
         navigate('/student/dashboard');
       } else {

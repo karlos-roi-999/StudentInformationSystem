@@ -6,7 +6,7 @@ function formatTime(t) { if (!t) return ''; const [h, m] = t.split(':'); const h
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 const hours = Array.from({ length: 10 }, (_, i) => i + 8); // 8 AM to 5 PM
 
-// Map day codes to column indices
+// Convert day pattern strings (MWF, TTh, Daily) to column indices for the grid
 function getDayIndices(daysOfWeek) {
   if (!daysOfWeek) return [];
   const map = { 'M': 0, 'T': 1, 'W': 2, 'Th': 3, 'F': 4 };
@@ -32,7 +32,7 @@ function StudentSchedule({ refreshTrigger, userInfo }) {
       .catch(err => console.error('Error:', err));
   }, [refreshTrigger]);
 
-  // Build timetable grid
+  // Find which enrollments occupy a particular cell in the timetable
   function getBlocksForCell(dayIdx, hour) {
     return enrollments.filter(e => {
       const startHour = parseInt((e.StartTime || e.start_time || '').split(':')[0]);

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// GET all courses in the database
+// List all courses
 router.get('/', async (req, res) => {
     try {
         const [results] = await db.query(`SELECT * FROM Course`);
@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET a single course by course_id
+// Get a single course by ID
 router.get('/:id', async (req,res) => {
     try {
         const [results] = await db.query('SELECT * FROM Course WHERE course_id = ?', req.params.id);
@@ -27,7 +27,7 @@ router.get('/:id', async (req,res) => {
     }
 });
 
-// POST (Create a new course) 
+// Add a new course
 router.post('/', async (req, res) => {
     try {
         const {course_name, subject_area, grade_level, course_description} = req.body;
@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT (Update) a course 
+// Update course fields dynamically
 router.put('/:id', async (req, res) => {
     try {
         const fields = [];
@@ -74,7 +74,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE a course
+// Remove a course by ID
 router.delete('/:id', async (req, res) => {
     try {
         const [result] = await db.query(`DELETE FROM Course WHERE course_id = ?`, req.params.id);

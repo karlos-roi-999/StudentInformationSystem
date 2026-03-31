@@ -26,7 +26,7 @@ const Sidebar = ({ userRole }) => {
   const isAdmin = userRole === 'Admin' || userRole === 'SuperAdmin';
   const isStudent = userRole === 'Student' || userRole === 'SuperAdmin';
 
-  // SuperAdmin gets both sets of links
+  // SuperAdmin sees both admin + student links
   let links = [];
   if (isAdmin) links = [...links, ...adminLinks];
   if (userRole === 'SuperAdmin') {
@@ -44,7 +44,7 @@ const Sidebar = ({ userRole }) => {
       flexDirection: 'column',
       flexShrink: 0
     }}>
-      {/* Logo */}
+      {/* App title */}
       <div style={{
         padding: '1.5rem',
         borderBottom: '1px solid #e5e7eb',
@@ -55,7 +55,7 @@ const Sidebar = ({ userRole }) => {
         </h2>
       </div>
 
-      {/* Nav Links */}
+      {/* Navigation links */}
       <nav style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
         {links.map((link, idx) => (
           link.divider ? (

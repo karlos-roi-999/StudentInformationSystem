@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET
 
-// Verify that the request has a valid JWT token
+// Middleware: checks for a valid JWT in the Authorization header
 function verifyToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // "Bearer <token>"
@@ -20,7 +20,7 @@ function verifyToken(req, res, next) {
     }
 }
 
-// Checks if user has the required role (SuperAdmin passes all checks)
+// Middleware: restricts access to specific roles (SuperAdmin always passes)
 function requireRole(...allowedRoles) {
     return (req, res, next) => {
         if (!req.user) {

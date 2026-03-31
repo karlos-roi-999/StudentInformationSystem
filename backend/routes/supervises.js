@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// GET all supervision relationships (with JOINs)
+// List all supervisor-supervisee pairs with faculty names
 router.get('/', async (req, res) => {
     try {
         const [rows] = await db.query(`
@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET all supervisees for a specific supervisor (with JOINs)
+// List all supervisees under a specific supervisor
 router.get('/:supervisorId', async (req, res) => {
     try {
         const [rows] = await db.query(`
@@ -46,12 +46,12 @@ router.get('/:supervisorId', async (req, res) => {
 });
 
 
-// POST (Create) a new supervision relationship
+// Create a new supervision assignment
 router.post('/', async (req, res) => {
     try {
         const {supervisor_id, supervisee_id} = req.body;
 
-        // Prevent a faculty member from supervising themselves
+        // Can't supervise yourself
         if (supervisor_id === supervisee_id) {
             return res.status(400).json({message: 'A faculty member cannot supervise themselves'});
         }
@@ -67,7 +67,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// DELETE a supervision relationship
+// Remove a supervision assignment
 router.delete('/', async (req, res) => {
     try {
         const {supervisor_id, supervisee_id} = req.body;

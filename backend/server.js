@@ -13,14 +13,14 @@ const supervisesRoutes = require('./routes/supervises');
 const authRoutes = require('./routes/auth');
 const statRoute = require('./routes/stats');
 
-// Environment variables from .env files
+// Load .env config
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
-// DO NOT TOUCH ANY OF THESE
+// API route mounting
 app.use('/api/students', studentRoutes);
 app.use('/api/faculty', facultyRoutes);
 app.use('/api/course', courseRoutes);
@@ -33,7 +33,7 @@ app.use('/api/supervises', supervisesRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/stats', statRoute);
 
-// Test to see if API is running in root port
+// Health check endpoint
 app.get('/', (req,res) => {
     res.json({ message: "Student Information System API is running"});
 });

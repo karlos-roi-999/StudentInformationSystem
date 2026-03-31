@@ -18,7 +18,7 @@ const fieldRow = (icon, label, value) => (
 function StudentProfile({ userInfo }) {
   const [student, setStudent] = useState(null);
 
-  // Fetch full student record from API using userInfo.id
+  // Load full student record from the API (localStorage only has basic info)
   useEffect(() => {
     if (!userInfo?.id) return;
     axios.get(`/api/students/${userInfo.id}`)
@@ -26,7 +26,7 @@ function StudentProfile({ userInfo }) {
       .catch(err => { console.error('Error fetching profile:', err); });
   }, [userInfo]);
 
-  // Merge localStorage info with API data
+  // Combine API data with localStorage as fallback
   const data = student || userInfo || {};
   const firstName = data.FirstName || data.first_name || '';
   const lastName = data.LastName || data.last_name || '';
@@ -46,7 +46,7 @@ function StudentProfile({ userInfo }) {
         backgroundColor: 'white', borderRadius: '16px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.05)', padding: '2rem', maxWidth: '600px'
       }}>
-        {/* Avatar + Name */}
+        {/* Profile avatar and name */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e5e7eb' }}>
           <div style={{
             width: '64px', height: '64px', borderRadius: '50%',
@@ -68,7 +68,7 @@ function StudentProfile({ userInfo }) {
           </div>
         </div>
 
-        {/* Fields */}
+        {/* Account details */}
         {fieldRow(<Mail size={16} color="#6b7280" />, 'Email', email)}
         {fieldRow(<Phone size={16} color="#6b7280" />, 'Phone', phone)}
         {fieldRow(<GraduationCap size={16} color="#6b7280" />, 'Grade Level', grade ? `Grade ${grade}` : null)}

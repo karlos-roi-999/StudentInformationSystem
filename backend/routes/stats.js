@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+// Dashboard summary counts (students, faculty, courses, active enrollments)
 router.get('/', async (req, res) => {
     try {
         const [rows] = await db.query(`

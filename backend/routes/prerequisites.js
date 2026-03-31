@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// GET all prerequisites (with JOINs)
+// List all prerequisite relationships with course names
 router.get('/', async (req, res) => {
     try {
         const [result] = await db.query(`
@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET all prerequisites for a specific course (with JOINs)
+// List prerequisites for a specific course
 router.get('/:id', async (req, res) => {
     try {
         const [result] = await db.query(`
@@ -38,12 +38,12 @@ router.get('/:id', async (req, res) => {
 });
 
 
-// POST (Create) a new prerequisite relationship
+// Add a prerequisite link between two courses
 router.post('/', async (req, res) => {
     try {
         const {course_id, prereq_course_id} = req.body;
 
-        // Prevent a course from being its own prerequisite
+        // Can't require itself as a prerequisite
         if (course_id === prereq_course_id) {
             return res.status(400).json({message: 'A course cannot be its own prerequisite'});
         }
@@ -59,7 +59,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// DELETE a prerequisite relationship
+// Remove a prerequisite link
 router.delete('/', async (req, res) => {
     try {
         const {course_id, prereq_course_id} = req.body;
